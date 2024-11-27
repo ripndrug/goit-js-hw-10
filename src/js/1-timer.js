@@ -8,7 +8,6 @@ import iziToast from "izitoast";
 // Додатковий імпорт стилів
 import "izitoast/dist/css/iziToast.min.css";
 
-
 const flatPicker = document.querySelector('#datetime-picker');
 const startBtn = document.querySelector('button[data-start]');
 const days = document.querySelector('span[data-days]');
@@ -19,10 +18,6 @@ const seconds = document.querySelector('span[data-seconds]');
 let userSelectedDate;
 let intervalId = null;
 
-startBtn.disabled = true;
-
-startBtn.addEventListener('click', handleStart);
-
 const options = {
   enableTime: true,
   time_24hr: true,
@@ -31,42 +26,49 @@ const options = {
   onClose(selectedDates) {
       console.log(selectedDates[0]);
       userSelectedDate = selectedDates[0];
-      let currentDate = new Date();
 
-    if (userSelectedDate < currentDate) {
-        iziToast.error({
+      const currentDate = new Date();
+
+      if (userSelectedDate < currentDate) {
+          iziToast.error({
             message: 'Please choose a date in the future',
             position: 'topRight',
             closeOnClick: true,
             progressBar: false,
-});
-        startBtn.disabled = true;
-    } else {
-        startBtn.disabled = false;
+        });
+          startBtn.disabled = true;
+          return;
+      } else {
+          startBtn.disabled = false;
       }
-      
   },
 };
 
 flatpickr(flatPicker, options);
 
+startBtn.addEventListener('click', handleStart);
+
 function handleStart() {
     startBtn.disabled = true;
     flatPicker.disabled = true;
-    
-    intervalId = setInterval(() => {
-        const currentDate = new Date();
-        const remainingDateMs = userSelectedDate - currentDate;
-          
-          if (remainingDateMs <= 0) {
-              clearInterval(intervalId);
-              updateTimerUI(0);
-              flatPicker.disabled = false;
-              return;
-          }
 
-          updateTimerUI(remainingDateMs);
-      }, 1000)
+    intervalId = setInterval(() => {
+        let currentDate = Date.now();
+        let remainingTime = userSelectedDate - currentDate;
+
+        updateTimerUI(remainingTime);
+
+        if (remainingTime <= 0) {
+        clearInterval(intervalId);
+        startBtn.disabled = false;
+        flatPicker.disabled = false;
+        
+        updateTimerUI(0);
+        return;
+    }
+    }, 1000);
+    
+    
 }
 
 function updateTimerUI(ms) {
@@ -104,5 +106,3 @@ function convertMs(ms) {
 console.log(convertMs(2000)); // {days: 0, hours: 0, minutes: 0, seconds: 2}
 console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
 console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
-
-console.log(flatPicker, startBtn, days, hours, minutes, seconds);
