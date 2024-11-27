@@ -3,6 +3,12 @@ import flatpickr from 'flatpickr';
 // Додатковий імпорт стилів
 import 'flatpickr/dist/flatpickr.min.css';
 
+// Описаний у документації
+import iziToast from "izitoast";
+// Додатковий імпорт стилів
+import "izitoast/dist/css/iziToast.min.css";
+
+
 const flatPicker = document.querySelector('#datetime-picker');
 const startBtn = document.querySelector('button[data-start]');
 const days = document.querySelector('span[data-days]');
@@ -28,7 +34,12 @@ const options = {
       let currentDate = new Date();
 
     if (userSelectedDate < currentDate) {
-        alert('Please choose a date in the future');
+        iziToast.error({
+            message: 'Please choose a date in the future',
+            position: 'topRight',
+            closeOnClick: true,
+            progressBar: false,
+});
         startBtn.disabled = true;
     } else {
         startBtn.disabled = false;
@@ -61,10 +72,14 @@ function handleStart() {
 function updateTimerUI(ms) {
     const time = convertMs(ms);
 
-    days.textContent = time.days.toString().padStart(2, '0');
-    hours.textContent = time.hours.toString().padStart(2, '0');
-    minutes.textContent = time.minutes.toString().padStart(2, '0');
-    seconds.textContent = time.seconds.toString().padStart(2, '0');
+    days.textContent = addLeadingZero(time.days);
+    hours.textContent = addLeadingZero(time.hours);
+    minutes.textContent = addLeadingZero(time.minutes);
+    seconds.textContent = addLeadingZero(time.seconds);
+}
+
+function addLeadingZero(value) {
+    return value.toString().padStart(2, '0');
 }
 
 function convertMs(ms) {
